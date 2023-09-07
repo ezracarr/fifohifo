@@ -27,15 +27,19 @@ function aggregateBuys(lots, date, price, quantity) {
     return "Error: Negative price or quantity provided";
   }
 
-  for (let lot of lots) {
+  let matched = false;
+  lots.forEach((lot) => {
     if (lot.date === date) {
+      matched = true;
       const totalCost = lot.price * lot.quantity + price * quantity;
       lot.quantity += quantity;
       lot.price = totalCost / lot.quantity;
-      return;
     }
+  });
+
+  if (!matched) {
+    lots.push(new TaxLot(lots.length + 1, date, price, quantity));
   }
-  lots.push(new TaxLot(lots.length + 1, date, price, quantity));
 }
 
 function processSale(lots, strategy, quantityToSell) {
@@ -59,8 +63,8 @@ function processSale(lots, strategy, quantityToSell) {
   let copiedLots = JSON.parse(JSON.stringify(lots));
 
   if (strategy === "fifo") {
-    for (const lot of copiedLots) {
-      if (remainingSale === 0) break;
+    copiedLots.forEach((lot) => {
+      if (remainingSale === 0) return;
 
       if (lot.quantity > remainingSale) {
         lot.quantity -= remainingSale;
@@ -69,12 +73,12 @@ function processSale(lots, strategy, quantityToSell) {
         remainingSale -= lot.quantity;
         lot.quantity = 0;
       }
-    }
+    });
   } else if (strategy === "hifo") {
     copiedLots.sort((a, b) => b.price - a.price);
 
-    for (const lot of copiedLots) {
-      if (remainingSale === 0) break;
+    copiedLots.forEach((lot) => {
+      if (remainingSale === 0) return;
 
       if (lot.quantity > remainingSale) {
         lot.quantity -= remainingSale;
@@ -83,7 +87,7 @@ function processSale(lots, strategy, quantityToSell) {
         remainingSale -= lot.quantity;
         lot.quantity = 0;
       }
-    }
+    });
 
     copiedLots.sort((a, b) => a.id - b.id);
   }
@@ -95,11 +99,11 @@ function processSale(lots, strategy, quantityToSell) {
 
   // If everything went well, update the original lots array and filter out 0 quantity lots.
   lots.length = 0; // Clear the original array
-  for (let lot of copiedLots) {
+  copiedLots.forEach((lot) => {
     if (lot.quantity > 0) {
       lots.push(lot);
     }
-  }
+  });
 
   return lots;
 }
@@ -124,7 +128,7 @@ function main() {
   });
 
   rl.on("close", () => {
-    for (let lot of lots) {
+    lots.forEach((lot) => {
       if (lot.quantity > 0) {
         console.log(
           `${lot.id},${lot.date},${lot.price.toFixed(2)},${lot.quantity.toFixed(
@@ -132,7 +136,7 @@ function main() {
           )}`
         );
       }
-    }
+    });
   });
 }
 
