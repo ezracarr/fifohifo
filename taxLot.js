@@ -11,11 +11,14 @@ class TaxLot {
   }
 }
 
+// Validates if the provided date string is in the correct format (YYYY-MM-DD).
+
 function isValidDate(date) {
   const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
   return dateRegex.test(date) && !isNaN(Date.parse(date));
 }
 
+// This function aggregates the buy transactions, checking and updating existing lots or adding a new lot.
 function aggregateBuys(lots, date, price, quantity) {
   if (!isValidDate(date)) {
     console.error("Error: Invalid date format");
@@ -42,6 +45,7 @@ function aggregateBuys(lots, date, price, quantity) {
   }
 }
 
+// This function processes the sale transaction based on the provided strategy (fifo or hifo).
 function processSale(lots, strategy, quantityToSell) {
   if (quantityToSell < 0) {
     console.error("Error: Negative sale quantity provided");
@@ -75,6 +79,7 @@ function processSale(lots, strategy, quantityToSell) {
       }
     });
   } else if (strategy === "hifo") {
+    // Sort the lots by price in descending order
     copiedLots.sort((a, b) => b.price - a.price);
 
     copiedLots.forEach((lot) => {
@@ -88,7 +93,7 @@ function processSale(lots, strategy, quantityToSell) {
         lot.quantity = 0;
       }
     });
-
+    // Sort back by ID to maintain the original order
     copiedLots.sort((a, b) => a.id - b.id);
   }
 
@@ -97,8 +102,8 @@ function processSale(lots, strategy, quantityToSell) {
     return "Error: Insufficient lots for sale"; // Error is returned, original lots array remains unchanged
   }
 
-  // If everything went well, update the original lots array and filter out 0 quantity lots.
-  lots.length = 0; // Clear the original array
+  // Update the original lots array and filter out any lots with 0 quantity.
+  lots.length = 0;
   copiedLots.forEach((lot) => {
     if (lot.quantity > 0) {
       lots.push(lot);
@@ -108,6 +113,7 @@ function processSale(lots, strategy, quantityToSell) {
   return lots;
 }
 
+// Main function that reads from stdin, processes the input based on the provided algorithm and prints the result to stdout.
 function main() {
   const algorithm = process.argv[2];
   const rl = readline.createInterface({
