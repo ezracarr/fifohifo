@@ -35,4 +35,8 @@ Errors are descriptive and output to stdout with a non-zero exit code.
 
 ## **Testing**
 
-To run the tests, use the following command: npm test
+To run the tests, use the following command:
+
+```bash
+ npm test
+```
